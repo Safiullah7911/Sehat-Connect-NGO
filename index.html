@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sehat-Connect - 5 Page Healthcare Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .nav-link.active {
+            font-weight: bold;
+        }
+        
+        .chat-bubble {
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full w-full overflow-auto">
+  <div class="main-wrapper w-full min-h-full" id="mainWrapper"><!-- Fixed Navigation (Hidden on Page 1) -->
+   <nav id="mainNav" class="fixed top-0 w-full shadow-lg z-50 hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex justify-between items-center h-16">
+      <div class="flex items-center space-x-3"><span class="text-3xl">🏥</span> <span class="site-brand text-xl font-bold" id="siteName">Sehat-Connect</span>
+      </div>
+      <div class="hidden md:flex space-x-1"><button onclick="navigateTo('medicine')" data-page="medicine" class="nav-link px-4 py-2 rounded-lg transition-all"> 💊 Medicine Bank </button> <button onclick="navigateTo('donors')" data-page="donors" class="nav-link px-4 py-2 rounded-lg transition-all"> 🩸 Blood Donors </button> <button onclick="navigateTo('ai')" data-page="ai" class="nav-link px-4 py-2 rounded-lg transition-all"> 🤖 AI Health Check </button> <button onclick="navigateTo('about')" data-page="about" class="nav-link px-4 py-2 rounded-lg transition-all"> ����️ About </button>
+      </div>
+      <div class="flex items-center space-x-3"><span class="user-name font-semibold" id="userName">User</span> <button onclick="logout()" class="logout-btn px-4 py-2 rounded-lg transition-all"> Logout </button>
+      </div><button class="md:hidden mobile-menu-btn" onclick="toggleMobileNav()">
+       <svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+       </svg></button>
+     </div>
+     <div id="mobileNav" class="md:hidden hidden pb-4 space-y-2"><button onclick="navigateTo('medicine'); toggleMobileNav();" class="mobile-nav-link block w-full text-left px-4 py-2 rounded-lg"> 💊 Medicine Bank </button> <button onclick="navigateTo('donors'); toggleMobileNav();" class="mobile-nav-link block w-full text-left px-4 py-2 rounded-lg"> 🩸 Blood Donors </button> <button onclick="navigateTo('ai'); toggleMobileNav();" class="mobile-nav-link block w-full text-left px-4 py-2 rounded-lg"> 🤖 AI Health Check </button> <button onclick="navigateTo('about'); toggleMobileNav();" class="mobile-nav-link block w-full text-left px-4 py-2 rounded-lg"> ℹ️ About </button> <button onclick="logout(); toggleMobileNav();" class="block w-full text-left px-4 py-2 rounded-lg font-semibold"> Logout </button>
+     </div>
+    </div>
+   </nav><!-- PAGE 1: Landing/Login Page -->
+   <div id="landingPage" class="page active landing-page w-full min-h-full flex items-center justify-center p-4">
+    <div class="max-w-6xl w-full grid md:grid-cols-2 gap-8 items-center"><!-- Left Side: Hero Content -->
+     <div class="hero-content text-center md:text-left fade-in">
+      <div class="mb-6"><span class="text-6xl mb-4 inline-block">🏥</span>
+       <h1 class="hero-main-title text-4xl md:text-5xl font-bold mb-4" id="heroTitle">Welcome to Sehat-Connect</h1>
+       <p class="hero-subtitle text-lg md:text-xl opacity-90" id="heroSubtitle"> Sehat-Connect is your all in one lifesaving bridge. Donate medicines, find blood donors instantly, and get smart health assistance—all in one place. </p>
+      </div>
+     </div><!-- Right Side: Login/Signup Form -->
+     <div class="auth-card rounded-2xl shadow-2xl p-8 fade-in">
+      <h2 class="auth-title text-2xl font-bold mb-6 text-center" id="loginTitle">Get Started</h2><!-- Tab Switcher -->
+      <div class="flex mb-6 rounded-lg overflow-hidden"><button id="signinTab" onclick="switchAuthTab('signin')" class="auth-tab flex-1 py-3 font-semibold transition-all active"> Sign In </button> <button id="signupTab" onclick="switchAuthTab('signup')" class="auth-tab flex-1 py-3 font-semibold transition-all"> Sign Up </button>
+      </div><!-- Sign In Form -->
+      <form id="signinForm" class="auth-form space-y-4" onsubmit="handleSignIn(event)">
+       <div><label for="signinEmail" class="form-label block text-sm font-medium mb-1">Email Address</label> <input type="email" id="signinEmail" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition-all" placeholder="you@example.com">
+       </div>
+       <div><label for="signinPassword" class="form-label block text-sm font-medium mb-1">Password</label> <input type="password" id="signinPassword" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition-all" placeholder="••••••••">
+       </div><button type="submit" class="auth-submit-btn w-full py-3 rounded-lg font-semibold transition-all hover:shadow-lg"> Sign In </button>
+      </form><!-- Sign Up Form -->
+      <form id="signupForm" class="auth-form space-y-4 hidden" onsubmit="handleSignUp(event)">
+       <div><label for="signupName" class="form-label block text-sm font-medium mb-1">Full Name</label> <input type="text" id="signupName" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition-all" placeholder="John Doe">
+       </div>
+       <div><label for="signupEmail" class="form-label block text-sm font-medium mb-1">Email Address</label> <input type="email" id="signupEmail" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition-all" placeholder="you@example.com">
+       </div>
+       <div><label for="signupPassword" class="form-label block text-sm font-medium mb-1">Password</label> <input type="password" id="signupPassword" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition-all" placeholder="••••••••">
+       </div><button type="submit" class="auth-submit-btn w-full py-3 rounded-lg font-semibold transition-all hover:shadow-lg"> Create Account </button>
+      </form>
+     </div>
+    </div>
+   </div><!-- PAGE 2: Medicine Donation -->
+   <div id="medicinePage" class="page medicine-page w-full min-h-full">
+    <div class="pt-20 pb-12 px-4">
+     <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-12 fade-in">
+       <h1 class="page-title text-4xl md:text-5xl font-bold mb-4" id="medicinePageTitle">Medicine Donation Bank</h1>
+       <p class="page-subtitle text-lg opacity-80">Help save lives by donating unused medicines</p>
+      </div><!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+       <div class="stat-card rounded-xl p-6 text-center shadow-lg">
+        <div class="text-4xl mb-2">
+         💊
+        </div>
+        <div class="stat-number text-3xl font-bold mb-1" id="totalMedicines">
+         0
+        </div>
+        <div class="stat-label text-sm opacity-70">
+         Total Medicines
+        </div>
+       </div>
+       <div class="stat-card rounded-xl p-6 text-center shadow-lg">
+        <div class="text-4xl mb-2">
+         🏙️
+        </div>
+        <div class="stat-number text-3xl font-bold mb-1" id="totalCities">
+         0
+        </div>
+        <div class="stat-label text-sm opacity-70">
+         Cities Covered
+        </div>
+       </div>
+       <div class="stat-card rounded-xl p-6 text-center shadow-lg">
+        <div class="text-4xl mb-2">
+         ❤️
+        </div>
+        <div class="stat-number text-3xl font-bold mb-1" id="totalDonations">
+         0
+        </div>
+        <div class="stat-label text-sm opacity-70">
+         Lives Impacted
+        </div>
+       </div>
+      </div><!-- Donation Form -->
+      <div class="donation-form-card rounded-2xl shadow-xl p-8 mb-12">
+       <h2 class="form-section-title text-2xl font-bold mb-6" id="medicineFormTitle">Donate Medicine</h2>
+       <form id="medicineForm" onsubmit="handleMedicineDonation(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div><label for="medName" class="form-label block text-sm font-medium mb-2">Medicine Name *</label> <input type="text" id="medName" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2" placeholder="e.g., Paracetamol 500mg">
+        </div>
+        <div><label for="medCity" class="form-label block text-sm font-medium mb-2">City *</label> <input type="text" id="medCity" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2" placeholder="e.g., Karachi">
+        </div>
+        <div><label for="medExpiry" class="form-label block text-sm font-medium mb-2">Expiry Date *</label> <input type="date" id="medExpiry" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2">
+        </div>
+        <div><label for="medQuantity" class="form-label block text-sm font-medium mb-2">Quantity *</label> <input type="number" id="medQuantity" required min="1" class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2" placeholder="e.g., 100">
+        </div>
+        <div class="md:col-span-2"><label for="medContact" class="form-label block text-sm font-medium mb-2">Contact Number *</label> <input type="tel" id="medContact" required class="form-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2" placeholder="+92-XXX-XXXXXXX">
+        </div>
+        <div class="md:col-span-2"><button type="submit" class="form-submit-btn w-full py-4 rounded-lg font-semibold text-lg transition-all hover:shadow-lg" id="medicineSubmitBtn"> Submit Donation </button>
+        </div>
+       </form>
+      </div><!-- Medicine List -->
+      <div class="medicine-list-card rounded-2xl shadow-xl p-8">
+       <h2 class="list-title text-2xl font-bold mb-6">Available Medicines</h2>
+       <div class="overflow-x-auto">
+        <table class="medicine-table w-full">
+         <thead class="table-header">
+          <tr>
+           <th class="px-4 py-3 text-left text-sm font-semibold">Medicine</th>
+           <th class="px-4 py-3 text-left text-sm font-semibold">City</th>
+           <th class="px-4 py-3 text-left text-sm font-semibold">Expiry</th>
+           <th class="px-4 py-3 text-left text-sm font-semibold">Qty</th>
+           <th class="px-4 py-3 text-left text-sm font-semibold">Contact</th>
+          </tr>
+         </thead>
+         <tbody id="medicineTableBody" class="table-body"><!-- Rows populated by JS -->
+         </tbody>
+        </table>
+       </div>
+       <div id="noMedicines" class="no-data text-center py-12 hidden">
+        <div class="text-6xl mb-4 opacity-50">
+         💊
+        </div>
+        <p class="text-lg opacity-70">No medicines donated yet. Be the first to help!</p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- PAGE 3: Blood Donors -->
+   <div id="donorsPage" class="page donors-page w-full min-h-full">
+    <div class="pt-20 pb-12 px-4">
+     <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-12 fade-in">
+       <h1 class="page-title text-4xl md:text-5xl font-bold mb-4" id="donorPageTitle">Blood Donor Directory</h1>
+       <p class="page-subtitle text-lg opacity-80">Connect with life-saving blood donors</p>
+      </div><!-- Search and Register -->
+      <div class="flex flex-col md:flex-row gap-4 mb-8">
+       <div class="flex-1"><input type="text" id="donorSearch" placeholder="Search by name, blood type, or city..." class="search-input w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2" oninput="filterDonors()">
+       </div><button onclick="openDonorRegistration()" class="register-btn px-6 py-3 rounded-lg font-semibold transition-all hover:shadow-lg whitespace-nowrap"> 🩸 Register as Donor </button>
+      </div><!-- Donor Cards Grid -->
+      <div id="donorGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Populated by JS -->
+      </div>
+      <div id="noDonors" class="no-data text-center py-12 hidden">
+       <div class="text-6xl mb-4 opacity-50">
+        🩸
+       </div>
+       <p class="text-lg opacity-70">No donors registered yet. Register now to save lives!</p>
+      </div>
+     </div>
+    </div>
+   </div><!-- PAGE 4: AI Health Assistant -->
+   <div id="aiPage" class="page ai-page w-full min-h-full">
+    <div class="pt-20 pb-12 px-4">
+     <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-8 fade-in">
+       <h1 class="page-title text-4xl md:text-5xl font-bold mb-4" id="aiPageTitle">AI Health Assistant</h1>
+       <p class="page-subtitle text-lg opacity-80">Get instant first-aid advice for common symptoms</p>
+      </div><!-- Chat Interface -->
+      <div class="chat-container rounded-2xl shadow-2xl overflow-hidden"><!-- Chat Header -->
+       <div class="chat-header p-6 flex items-center space-x-3"><span class="text-3xl">🤖</span>
+        <div>
+         <h2 class="chat-header-title font-bold text-lg">Medical AI</h2>
+         <p class="chat-header-subtitle text-sm opacity-80">Always here to help</p>
+        </div>
+       </div><!-- Chat Messages -->
+       <div id="chatMessages" class="chat-messages-area p-6 space-y-4" style="height: 400px; overflow-y: auto;">
+        <div class="chat-bubble bot-bubble p-4 rounded-2xl max-w-80">
+         <p class="message-text" id="aiWelcomeMessage">Hello! I'm your AI health assistant. Describe your symptoms and I'll provide first-aid advice. Remember, for serious conditions, always consult a healthcare professional.</p>
+        </div>
+       </div><!-- Quick Buttons -->
+       <div class="quick-buttons-area px-6 pb-4 flex flex-wrap gap-2"><button onclick="sendQuickMessage('I have a fever')" class="quick-btn px-4 py-2 rounded-full text-sm font-medium transition-all"> 🌡️ Fever </button> <button onclick="sendQuickMessage('I have a headache')" class="quick-btn px-4 py-2 rounded-full text-sm font-medium transition-all"> 🤕 Headache </button> <button onclick="sendQuickMessage('I have a cough')" class="quick-btn px-4 py-2 rounded-full text-sm font-medium transition-all"> �� Cough </button> <button onclick="sendQuickMessage('I have stomach pain')" class="quick-btn px-4 py-2 rounded-full text-sm font-medium transition-all"> 🤢 Stomach Pain </button>
+       </div><!-- Chat Input -->
+       <div class="chat-input-area p-6 pt-0">
+        <form onsubmit="sendChatMessage(event)" class="flex gap-2"><input type="text" id="chatInput" placeholder="Type your symptoms..." class="chat-input flex-1 px-4 py-3 rounded-full border-2 focus:outline-none focus:ring-2" autocomplete="off"> <button type="submit" class="chat-send-btn px-6 py-3 rounded-full font-semibold transition-all hover:shadow-lg"> Send </button>
+        </form>
+       </div>
+      </div><!-- Disclaimer -->
+      <div class="disclaimer-box mt-6 p-4 rounded-lg text-center text-sm opacity-70">
+       ⚠️ This AI provides general first-aid information only. Always consult a healthcare professional for proper diagnosis and treatment.
+      </div>
+     </div>
+    </div>
+   </div><!-- PAGE 5: About SDG 3 -->
+   <div id="aboutPage" class="page about-page w-full min-h-full">
+    <div class="pt-20 pb-12 px-4">
+     <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12 fade-in">
+       <div class="text-7xl mb-6">
+        🎯
+       </div>
+       <h1 class="page-title text-4xl md:text-5xl font-bold mb-4" id="aboutPageTitle">About SDG 3: Good Health and Well-being</h1>
+       <p class="page-subtitle text-lg opacity-80" id="aboutDescription">Ensuring healthy lives and promoting well-being for all at all ages</p>
+      </div><!-- Main Content -->
+      <div class="about-content-card rounded-2xl shadow-xl p-8 mb-8">
+       <h2 class="section-heading text-2xl font-bold mb-4">Our Mission</h2>
+       <p class="content-text text-lg mb-6 opacity-90">Sehat-Connect is committed to supporting the United Nations Sustainable Development Goal 3: Good Health and Well-being. We believe that access to healthcare is a fundamental human right, and our platform works to bridge the gap between those who need medical assistance and those who can provide it.</p>
+       <h2 class="section-heading text-2xl font-bold mb-4">What is SDG 3?</h2>
+       <p class="content-text text-lg mb-6 opacity-90">SDG 3 aims to ensure healthy lives and promote well-being for all at all ages. It addresses major health priorities including reproductive, maternal and child health, infectious diseases, and universal health coverage.</p>
+       <h2 class="section-heading text-2xl font-bold mb-4">How We Contribute</h2>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="contribution-card p-6 rounded-xl">
+         <div class="text-4xl mb-3">
+          💊
+         </div>
+         <h3 class="contribution-title font-bold text-lg mb-2">Medicine Access</h3>
+         <p class="contribution-text opacity-80">Facilitating donation and redistribution of medicines to those in need</p>
+        </div>
+        <div class="contribution-card p-6 rounded-xl">
+         <div class="text-4xl mb-3">
+          🩸
+         </div>
+         <h3 class="contribution-title font-bold text-lg mb-2">Blood Donation</h3>
+         <p class="contribution-text opacity-80">Connecting blood donors with recipients in emergency situations</p>
+        </div>
+        <div class="contribution-card p-6 rounded-xl">
+         <div class="text-4xl mb-3">
+          🤖
+         </div>
+         <h3 class="contribution-title font-bold text-lg mb-2">AI Health Guidance</h3>
+         <p class="contribution-text opacity-80">Providing instant first-aid advice through AI technology</p>
+        </div>
+        <div class="contribution-card p-6 rounded-xl">
+         <div class="text-4xl mb-3">
+          🌐
+         </div>
+         <h3 class="contribution-title font-bold text-lg mb-2">Community Building</h3>
+         <p class="contribution-text opacity-80">Creating a network of healthcare support across communities</p>
+        </div>
+       </div>
+      </div><!-- Impact Stats -->
+      <div class="impact-stats-card rounded-2xl shadow-xl p-8 mb-8">
+       <h2 class="section-heading text-2xl font-bold mb-6 text-center">Our Impact</h2>
+       <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="impact-stat text-center">
+         <div class="impact-number text-4xl font-bold mb-2">
+          500+
+         </div>
+         <div class="impact-label text-sm opacity-70">
+          Medicines Donated
+         </div>
+        </div>
+        <div class="impact-stat text-center">
+         <div class="impact-number text-4xl font-bold mb-2">
+          200+
+         </div>
+         <div class="impact-label text-sm opacity-70">
+          Blood Donors
+         </div>
+        </div>
+        <div class="impact-stat text-center">
+         <div class="impact-number text-4xl font-bold mb-2">
+          1000+
+         </div>
+         <div class="impact-label text-sm opacity-70">
+          Lives Impacted
+         </div>
+        </div>
+        <div class="impact-stat text-center">
+         <div class="impact-number text-4xl font-bold mb-2">
+          50+
+         </div>
+         <div class="impact-label text-sm opacity-70">
+          Cities Reached
+         </div>
+        </div>
+       </div>
+      </div><!-- Footer -->
+      <footer class="footer-area text-center py-8 border-t">
+       <p class="footer-text opacity-70">© 2024 Sehat-Connect. Supporting SDG 3: Good Health and Well-being.</p>
+       <p class="footer-subtext text-sm opacity-60 mt-2">Together, we can make healthcare accessible to all.</p>
+      </footer>
+     </div>
+    </div>
+   </div><!-- Donor Registration Modal -->
+   <div id="donorModal" class="fixed inset-0 z-50 hidden overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="flex items-center justify-center min-h-full p-4 py-12">
+     <div class="modal-content w-full max-w-md rounded-2xl shadow-2xl p-8 my-8">
+      <div class="flex justify-between items-center mb-6">
+       <h3 class="modal-title text-2xl font-bold">Register as Blood Donor</h3><button type="button" onclick="closeDonorModal()" class="modal-close text-3xl font-bold hover:opacity-70 leading-none">×</button>
+      </div>
+      <form id="donorForm" onsubmit="handleDonorRegistration(event)" class="space-y-5" novalidate>
+       <div><label for="donorName" class="form-label block text-sm font-semibold mb-2">Full Name *</label> <input type="text" id="donorName" class="form-input w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all" placeholder="Enter your full name">
+        <p id="donorNameError" class="error-message text-red-600 text-xs mt-1 hidden">This is required</p>
+       </div>
+       <div><label for="donorBloodType" class="form-label block text-sm font-semibold mb-2">Blood Type *</label> <select id="donorBloodType" class="form-input w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all"> <option value="">Select Blood Type</option> <option value="A+">A+</option> <option value="A-">A-</option> <option value="B+">B+</option> <option value="B-">B-</option> <option value="AB+">AB+</option> <option value="AB-">AB-</option> <option value="O+">O+</option> <option value="O-">O-</option> </select>
+        <p id="donorBloodTypeError" class="error-message text-red-600 text-xs mt-1 hidden">This is required</p>
+       </div>
+       <div><label for="donorAge" class="form-label block text-sm font-semibold mb-2">Age *</label> <input type="number" id="donorAge" min="18" max="65" class="form-input w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all" placeholder="18-65">
+        <p id="donorAgeError" class="error-message text-red-600 text-xs mt-1 hidden">This is required</p>
+       </div>
+       <div><label for="donorCity" class="form-label block text-sm font-semibold mb-2">City *</label> <input type="text" id="donorCity" class="form-input w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all" placeholder="Enter your city">
+        <p id="donorCityError" class="error-message text-red-600 text-xs mt-1 hidden">This is required</p>
+       </div>
+       <div><label for="donorContact" class="form-label block text-sm font-semibold mb-2">Contact Number *</label> <input type="tel" id="donorContact" class="form-input w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all" placeholder="+92-XXX-XXXXXXX">
+        <p id="donorContactError" class="error-message text-red-600 text-xs mt-1 hidden">This is required</p>
+       </div>
+       <div><label for="lastDonation" class="form-label block text-sm font-semibold mb-2">Last Donation Date (Optional)</label> <input type="date" id="lastDonation" class="form-input w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all">
+       </div><button type="submit" class="modal-submit-btn w-full py-4 rounded-xl font-bold text-lg transition-all hover:shadow-lg mt-6" id="donorSubmitBtn"> Register as Donor </button>
+      </form>
+     </div>
+    </div>
+   </div><!-- Success Toast -->
+   <div id="successToast" class="fixed top-24 right-6 hidden z-50 px-6 py-4 rounded-lg shadow-2xl slide-in">
+    <p class="toast-text font-semibold">✓ <span id="toastMessage">Success!</span></p>
+   </div>
+  </div>
+  <script>
+        // Configuration
+        const defaultConfig = {
+            background_color: '#e0f2fe',
+            surface_color: '#ffffff',
+            text_color: '#0c4a6e',
+            primary_action_color: '#0284c7',
+            secondary_action_color: '#0ea5e9',
+            site_name: 'Sehat-Connect',
+            tagline: 'Your health, our priority',
+            hero_title: 'Welcome to Sehat-Connect',
+            hero_subtitle: 'Your comprehensive healthcare platform for medicine donations, blood donor connections, and AI-powered health assistance',
+            login_title: 'Get Started',
+            medicine_page_title: 'Medicine Donation Bank',
+            medicine_form_title: 'Donate Medicine',
+            donor_page_title: 'Blood Donor Directory',
+            donor_search_placeholder: 'Search by name, blood type, or city...',
+            ai_page_title: 'AI Health Assistant',
+            ai_welcome_message: 'Hello! I\'m your AI health assistant. Describe your symptoms and I\'ll provide first-aid advice. Remember, for serious conditions, always consult a healthcare professional.',
+            about_page_title: 'About SDG 3: Good Health and Well-being',
+            about_description: 'Ensuring healthy lives and promoting well-being for all at all ages'
+        };
+
+        // Global state
+        let currentUser = null;
+        let allData = [];
+        let isDataInitialized = false;
+
+        // AI responses
+        const aiKnowledge = {
+            'fever': 'For fever: Rest well, drink plenty of fluids (water, ORS), and take paracetamol (acetaminophen) if needed. Apply a cool compress to your forehead. If fever exceeds 102°F (39°C) or persists for more than 3 days, consult a doctor immediately.',
+            'headache': 'For headaches: Rest in a quiet, dark room. Stay well-hydrated. Apply a cold or warm compress to your head. Take OTC pain relievers like paracetamol or ibuprofen. If headache is severe, sudden, or accompanied by vision changes, seek medical attention.',
+            'cough': 'For cough: Stay hydrated with warm liquids. Use honey with warm water or tea (not for children under 1 year). Rest and use a humidifier. Avoid irritants like smoke. If cough persists for more than 2 weeks, includes blood, or causes breathing difficulty, see a doctor.',
+            'cold': 'For cold: Get plenty of rest and stay hydrated. Use steam inhalation to relieve congestion. Gargle with warm salt water for sore throat. Take vitamin C. Most colds resolve in 7-10 days. See a doctor if symptoms worsen or persist beyond 2 weeks.',
+            'stomach': 'For stomach issues: Eat bland foods (rice, bananas, toast). Stay hydrated with ORS or clear fluids. Avoid spicy, fatty, and dairy foods. Rest. If you experience severe pain, blood in stool, high fever, or persistent vomiting, seek immediate medical care.',
+            'pain': 'For general pain: Rest the affected area. Apply ice for acute injuries (first 48 hours) or heat for chronic pain. Take OTC pain relievers as directed. Gentle stretching may help. If pain is severe, persistent, or limits movement, consult a healthcare provider.',
+            'dizziness': 'For dizziness: Sit or lie down immediately. Stay hydrated. Avoid sudden movements. If accompanied by chest pain, severe headache, or loss of consciousness, seek emergency care.',
+            'nausea': 'For nausea: Sip clear fluids slowly. Eat bland foods like crackers or toast. Avoid strong odors. Rest. Ginger tea may help. If persistent or with severe symptoms, consult a doctor.'
+        };
+
+        // Data SDK Handler
+        const dataHandler = {
+            onDataChanged(data) {
+                allData = data;
+                isDataInitialized = true;
+                updateMedicineStats();
+                renderMedicineTable();
+                renderDonorCards();
+            }
+        };
+
+        // Initialize
+        async function initialize() {
+            if (window.dataSdk) {
+                const result = await window.dataSdk.init(dataHandler);
+                if (!result.isOk) {
+                    console.error('Failed to initialize Data SDK');
+                }
+            }
+            
+            if (window.elementSdk) {
+                window.elementSdk.init({
+                    defaultConfig: defaultConfig,
+                    onConfigChange: async (config) => {
+                        await applyStyles(config);
+                    },
+                    mapToCapabilities: (config) => ({
+                        recolorables: [
+                            {
+                                get: () => config.background_color || defaultConfig.background_color,
+                                set: (value) => {
+                                    config.background_color = value;
+                                    window.elementSdk.setConfig({ background_color: value });
+                                }
+                            },
+                            {
+                                get: () => config.surface_color || defaultConfig.surface_color,
+                                set: (value) => {
+                                    config.surface_color = value;
+                                    window.elementSdk.setConfig({ surface_color: value });
+                                }
+                            },
+                            {
+                                get: () => config.text_color || defaultConfig.text_color,
+                                set: (value) => {
+                                    config.text_color = value;
+                                    window.elementSdk.setConfig({ text_color: value });
+                                }
+                            },
+                            {
+                                get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                                set: (value) => {
+                                    config.primary_action_color = value;
+                                    window.elementSdk.setConfig({ primary_action_color: value });
+                                }
+                            },
+                            {
+                                get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+                                set: (value) => {
+                                    config.secondary_action_color = value;
+                                    window.elementSdk.setConfig({ secondary_action_color: value });
+                                }
+                            }
+                        ],
+                        borderables: [],
+                        fontEditable: undefined,
+                        fontSizeable: undefined
+                    }),
+                    mapToEditPanelValues: (config) => new Map([
+                        ['site_name', config.site_name || defaultConfig.site_name],
+                        ['tagline', config.tagline || defaultConfig.tagline],
+                        ['hero_title', config.hero_title || defaultConfig.hero_title],
+                        ['hero_subtitle', config.hero_subtitle || defaultConfig.hero_subtitle],
+                        ['login_title', config.login_title || defaultConfig.login_title],
+                        ['medicine_page_title', config.medicine_page_title || defaultConfig.medicine_page_title],
+                        ['medicine_form_title', config.medicine_form_title || defaultConfig.medicine_form_title],
+                        ['donor_page_title', config.donor_page_title || defaultConfig.donor_page_title],
+                        ['donor_search_placeholder', config.donor_search_placeholder || defaultConfig.donor_search_placeholder],
+                        ['ai_page_title', config.ai_page_title || defaultConfig.ai_page_title],
+                        ['ai_welcome_message', config.ai_welcome_message || defaultConfig.ai_welcome_message],
+                        ['about_page_title', config.about_page_title || defaultConfig.about_page_title],
+                        ['about_description', config.about_description || defaultConfig.about_description]
+                    ])
+                });
+            }
+            
+            applyStyles(defaultConfig);
+        }
+
+        // Apply Styles
+        async function applyStyles(config) {
+            const wrapper = document.getElementById('mainWrapper');
+            wrapper.style.backgroundColor = config.background_color;
+
+            // Navigation
+            const mainNav = document.getElementById('mainNav');
+            mainNav.style.backgroundColor = config.surface_color;
+            mainNav.style.color = config.text_color;
+
+            const siteName = document.getElementById('siteName');
+            siteName.textContent = config.site_name;
+            siteName.style.color = config.text_color;
+
+            const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+            navLinks.forEach(link => {
+                link.style.color = config.text_color;
+            });
+
+            const navLinksHover = document.querySelectorAll('.nav-link');
+            navLinksHover.forEach(link => {
+                link.addEventListener('mouseenter', () => {
+                    link.style.backgroundColor = config.background_color;
+                });
+                link.addEventListener('mouseleave', () => {
+                    if (!link.classList.contains('active')) {
+                        link.style.backgroundColor = 'transparent';
+                    }
+                });
+            });
+
+            const logoutBtn = document.querySelector('.logout-btn');
+            logoutBtn.style.backgroundColor = config.secondary_action_color;
+            logoutBtn.style.color = config.surface_color;
+
+            // Landing Page
+            const landingPage = document.getElementById('landingPage');
+            landingPage.style.backgroundColor = config.primary_action_color;
+
+            const heroTitle = document.getElementById('heroTitle');
+            heroTitle.textContent = config.hero_title;
+            heroTitle.style.color = config.surface_color;
+
+            const heroSubtitle = document.getElementById('heroSubtitle');
+            heroSubtitle.textContent = config.hero_subtitle;
+            heroSubtitle.style.color = config.surface_color;
+
+            const authCard = document.querySelector('.auth-card');
+            authCard.style.backgroundColor = config.surface_color;
+
+            const authTitle = document.getElementById('loginTitle');
+            authTitle.textContent = config.login_title;
+            authTitle.style.color = config.text_color;
+
+            const authTabs = document.querySelectorAll('.auth-tab');
+            authTabs.forEach(tab => {
+                tab.style.color = config.text_color;
+                if (tab.classList.contains('active')) {
+                    tab.style.backgroundColor = config.primary_action_color;
+                    tab.style.color = config.surface_color;
+                } else {
+                    tab.style.backgroundColor = config.background_color;
+                }
+            });
+
+            const formLabels = document.querySelectorAll('.form-label');
+            formLabels.forEach(label => {
+                label.style.color = config.text_color;
+            });
+
+            const formInputs = document.querySelectorAll('.form-input');
+            formInputs.forEach(input => {
+                input.style.backgroundColor = config.surface_color;
+                input.style.borderColor = config.secondary_action_color;
+                input.style.color = config.text_color;
+            });
+
+            const authSubmitBtns = document.querySelectorAll('.auth-submit-btn');
+            authSubmitBtns.forEach(btn => {
+                btn.style.backgroundColor = config.primary_action_color;
+                btn.style.color = config.surface_color;
+            });
+
+            // Medicine Page
+            const medicinePage = document.getElementById('medicinePage');
+            medicinePage.style.backgroundColor = config.background_color;
+
+            const medicinePageTitle = document.getElementById('medicinePageTitle');
+            medicinePageTitle.textContent = config.medicine_page_title;
+            medicinePageTitle.style.color = config.text_color;
+
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach(card => {
+                card.style.backgroundColor = config.surface_color;
+                card.style.color = config.text_color;
+            });
+
+            const donationFormCard = document.querySelector('.donation-form-card');
+            donationFormCard.style.backgroundColor = config.surface_color;
+
+            const medicineFormTitle = document.getElementById('medicineFormTitle');
+            medicineFormTitle.textContent = config.medicine_form_title;
+            medicineFormTitle.style.color = config.text_color;
+
+            const formSubmitBtn = document.querySelector('.form-submit-btn');
+            formSubmitBtn.style.backgroundColor = config.primary_action_color;
+            formSubmitBtn.style.color = config.surface_color;
+
+            const medicineListCard = document.querySelector('.medicine-list-card');
+            medicineListCard.style.backgroundColor = config.surface_color;
+
+            const tableHeader = document.querySelector('.table-header');
+            tableHeader.style.backgroundColor = config.primary_action_color;
+            const thElements = tableHeader.querySelectorAll('th');
+            thElements.forEach(th => {
+                th.style.color = config.surface_color;
+            });
+
+            // Donors Page
+            const donorsPage = document.getElementById('donorsPage');
+            donorsPage.style.backgroundColor = config.background_color;
+
+            const donorPageTitle = document.getElementById('donorPageTitle');
+            donorPageTitle.textContent = config.donor_page_title;
+            donorPageTitle.style.color = config.text_color;
+
+            const donorSearch = document.getElementById('donorSearch');
+            donorSearch.placeholder = config.donor_search_placeholder;
+            donorSearch.style.backgroundColor = config.surface_color;
+            donorSearch.style.borderColor = config.secondary_action_color;
+            donorSearch.style.color = config.text_color;
+
+            const registerBtn = document.querySelector('.register-btn');
+            registerBtn.style.backgroundColor = config.primary_action_color;
+            registerBtn.style.color = config.surface_color;
+
+            // Update all page subtitles
+            const pageSubtitles = document.querySelectorAll('.page-subtitle');
+            pageSubtitles.forEach(subtitle => {
+                subtitle.style.color = config.text_color;
+            });
+
+            // Update all section headings
+            const sectionHeadings = document.querySelectorAll('.section-heading, .list-title, .form-section-title');
+            sectionHeadings.forEach(heading => {
+                heading.style.color = config.text_color;
+            });
+
+            // Update all content text
+            const contentTexts = document.querySelectorAll('.content-text, .stat-label, .contribution-text, .impact-label, .no-data');
+            contentTexts.forEach(text => {
+                text.style.color = config.text_color;
+            });
+
+            // Update stat and impact numbers
+            const statNumbers = document.querySelectorAll('.stat-number, .impact-number');
+            statNumbers.forEach(num => {
+                num.style.color = config.primary_action_color;
+            });
+
+            // Update contribution titles
+            const contributionTitles = document.querySelectorAll('.contribution-title');
+            contributionTitles.forEach(title => {
+                title.style.color = config.text_color;
+            });
+
+            // Update footer
+            const footerTexts = document.querySelectorAll('.footer-text, .footer-subtext, .footer-area');
+            footerTexts.forEach(text => {
+                text.style.color = config.text_color;
+            });
+
+            // Update disclaimer
+            const disclaimer = document.querySelector('.disclaimer-box');
+            if (disclaimer) {
+                disclaimer.style.backgroundColor = config.surface_color;
+                disclaimer.style.color = config.text_color;
+            }
+
+            // Update chat messages area
+            const chatMessagesArea = document.querySelector('.chat-messages-area');
+            if (chatMessagesArea) {
+                chatMessagesArea.style.backgroundColor = config.background_color;
+            }
+
+            // Update chat input and button areas
+            const chatInputArea = document.querySelector('.chat-input-area');
+            if (chatInputArea) {
+                chatInputArea.style.backgroundColor = config.surface_color;
+            }
+
+            const quickButtonsArea = document.querySelector('.quick-buttons-area');
+            if (quickButtonsArea) {
+                quickButtonsArea.style.backgroundColor = config.surface_color;
+            }
+
+            // Update chat header texts
+            const chatHeaderTitle = document.querySelector('.chat-header-title');
+            if (chatHeaderTitle) {
+                chatHeaderTitle.style.color = config.surface_color;
+            }
+
+            const chatHeaderSubtitle = document.querySelector('.chat-header-subtitle');
+            if (chatHeaderSubtitle) {
+                chatHeaderSubtitle.style.color = config.surface_color;
+            }
+
+            // Update modal close button
+            const modalClose = document.querySelector('.modal-close');
+            if (modalClose) {
+                modalClose.style.color = config.text_color;
+            }
+
+            // Update user name display
+            const userName = document.getElementById('userName');
+            if (userName) {
+                userName.style.color = config.text_color;
+            }
+
+            // Update mobile menu button
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.style.color = config.text_color;
+            }
+
+            // AI Page
+            const aiPage = document.getElementById('aiPage');
+            aiPage.style.backgroundColor = config.background_color;
+
+            const aiPageTitle = document.getElementById('aiPageTitle');
+            aiPageTitle.textContent = config.ai_page_title;
+            aiPageTitle.style.color = config.text_color;
+
+            const chatContainer = document.querySelector('.chat-container');
+            chatContainer.style.backgroundColor = config.surface_color;
+
+            const chatHeader = document.querySelector('.chat-header');
+            chatHeader.style.backgroundColor = config.primary_action_color;
+            chatHeader.style.color = config.surface_color;
+
+            const aiWelcomeMessage = document.getElementById('aiWelcomeMessage');
+            aiWelcomeMessage.textContent = config.ai_welcome_message;
+
+            const botBubbles = document.querySelectorAll('.bot-bubble');
+            botBubbles.forEach(bubble => {
+                bubble.style.backgroundColor = config.background_color;
+                bubble.style.color = config.text_color;
+            });
+
+            const userBubbles = document.querySelectorAll('.user-bubble');
+            userBubbles.forEach(bubble => {
+                bubble.style.backgroundColor = config.primary_action_color;
+                bubble.style.color = config.surface_color;
+            });
+
+            const quickBtns = document.querySelectorAll('.quick-btn');
+            quickBtns.forEach(btn => {
+                btn.style.backgroundColor = config.background_color;
+                btn.style.color = config.text_color;
+                btn.style.borderColor = config.secondary_action_color;
+            });
+
+            const chatInput = document.getElementById('chatInput');
+            chatInput.style.backgroundColor = config.surface_color;
+            chatInput.style.borderColor = config.secondary_action_color;
+            chatInput.style.color = config.text_color;
+
+            const chatSendBtn = document.querySelector('.chat-send-btn');
+            chatSendBtn.style.backgroundColor = config.primary_action_color;
+            chatSendBtn.style.color = config.surface_color;
+
+            // About Page
+            const aboutPage = document.getElementById('aboutPage');
+            aboutPage.style.backgroundColor = config.background_color;
+
+            const aboutPageTitle = document.getElementById('aboutPageTitle');
+            aboutPageTitle.textContent = config.about_page_title;
+            aboutPageTitle.style.color = config.text_color;
+
+            const aboutDescription = document.getElementById('aboutDescription');
+            aboutDescription.textContent = config.about_description;
+            aboutDescription.style.color = config.text_color;
+
+            const aboutContentCard = document.querySelector('.about-content-card');
+            aboutContentCard.style.backgroundColor = config.surface_color;
+            aboutContentCard.style.color = config.text_color;
+
+            const contributionCards = document.querySelectorAll('.contribution-card');
+            contributionCards.forEach(card => {
+                card.style.backgroundColor = config.background_color;
+                card.style.color = config.text_color;
+            });
+
+            const impactStatsCard = document.querySelector('.impact-stats-card');
+            impactStatsCard.style.backgroundColor = config.surface_color;
+            impactStatsCard.style.color = config.text_color;
+
+            // Modal
+            const modalContent = document.querySelector('.modal-content');
+            modalContent.style.backgroundColor = config.surface_color;
+
+            const modalTitle = document.querySelector('.modal-title');
+            modalTitle.style.color = config.text_color;
+
+            const modalSubmitBtn = document.querySelector('.modal-submit-btn');
+            modalSubmitBtn.style.backgroundColor = config.primary_action_color;
+            modalSubmitBtn.style.color = config.surface_color;
+
+            // Toast
+            const successToast = document.getElementById('successToast');
+            successToast.style.backgroundColor = config.primary_action_color;
+            successToast.style.color = config.surface_color;
+        }
+
+        // Authentication
+        function switchAuthTab(tab) {
+            const signinTab = document.getElementById('signinTab');
+            const signupTab = document.getElementById('signupTab');
+            const signinForm = document.getElementById('signinForm');
+            const signupForm = document.getElementById('signupForm');
+
+            const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+
+            if (tab === 'signin') {
+                signinTab.classList.add('active');
+                signupTab.classList.remove('active');
+                signinTab.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
+                signinTab.style.color = config.surface_color || defaultConfig.surface_color;
+                signupTab.style.backgroundColor = config.background_color || defaultConfig.background_color;
+                signupTab.style.color = config.text_color || defaultConfig.text_color;
+                signinForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+            } else {
+                signupTab.classList.add('active');
+                signinTab.classList.remove('active');
+                signupTab.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
+                signupTab.style.color = config.surface_color || defaultConfig.surface_color;
+                signinTab.style.backgroundColor = config.background_color || defaultConfig.background_color;
+                signinTab.style.color = config.text_color || defaultConfig.text_color;
+                signupForm.classList.remove('hidden');
+                signinForm.classList.add('hidden');
+            }
+        }
+
+        function handleSignIn(event) {
+            event.preventDefault();
+            const email = document.getElementById('signinEmail').value;
+            currentUser = email.split('@')[0];
+            document.getElementById('userName').textContent = currentUser;
+            navigateTo('medicine');
+        }
+
+        function handleSignUp(event) {
+            event.preventDefault();
+            const name = document.getElementById('signupName').value;
+            currentUser = name;
+            document.getElementById('userName').textContent = currentUser;
+            navigateTo('medicine');
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainNav').classList.add('hidden');
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById('landingPage').classList.add('active');
+            document.getElementById('signinForm').reset();
+            document.getElementById('signupForm').reset();
+        }
+
+        // Navigation
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId + 'Page').classList.add('active');
+            
+            document.getElementById('mainNav').classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+                link.style.backgroundColor = 'transparent';
+            });
+            
+            const activeLink = document.querySelector(`[data-page="${pageId}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+                const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+                activeLink.style.backgroundColor = config.background_color || defaultConfig.background_color;
+            }
+            
+            window.scrollTo(0, 0);
+        }
+
+        function toggleMobileNav() {
+            document.getElementById('mobileNav').classList.toggle('hidden');
+        }
+
+        // Medicine Functions
+        async function handleMedicineDonation(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('medicineSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            
+            const medicineData = {
+                id: Date.now().toString(),
+                type: 'medicine',
+                medicine_name: document.getElementById('medName').value,
+                city: document.getElementById('medCity').value,
+                expiry_date: document.getElementById('medExpiry').value,
+                quantity: parseInt(document.getElementById('medQuantity').value),
+                contact: document.getElementById('medContact').value,
+                created_at: new Date().toISOString()
+            };
+
+            if (allData.length >= 999) {
+                showToast('Maximum limit of 999 records reached. Please delete some records first.');
+                btn.disabled = false;
+                btn.textContent = 'Submit Donation';
+                return;
+            }
+
+            // Line 917 par ye paste karein
+try {
+    // 1. Data ko local array mein save karein
+    allData.push(medicineData); 
+
+    // 2. Success message dikhayein
+    showToast('Medicine donated successfully!');
+    
+    // 3. Form reset karein aur table refresh karein
+    document.getElementById('medicineForm').reset();
+    renderMedicineTable(); // Jo function humne 1048 par banaya tha
+    updateMedicineStats(); // Stats update karne ke liye
+
+} catch (error) {
+    showToast('Failed to save record locally.');
+    console.error(error);
+}
+            
+            btn.disabled = false;
+            btn.textContent = 'Submit Donation';
+        }
+
+        function updateMedicineStats() {
+            const medicines = allData.filter(item => item.type === 'medicine');
+            const cities = new Set(medicines.map(m => m.city));
+            
+            document.getElementById('totalMedicines').textContent = medicines.length;
+            document.getElementById('totalCities').textContent = cities.size;
+            document.getElementById('totalDonations').textContent = medicines.length * 2;
+        }
+
+        function renderMedicineTable() {
+            const tbody = document.getElementById('medicineTableBody');
+            const noMedicines = document.getElementById('noMedicines');
+            const medicines = allData.filter(item => item.type === 'medicine');
+            
+            tbody.innerHTML = '';
+            
+            if (medicines.length === 0) {
+                noMedicines.classList.remove('hidden');
+                return;
+            }
+            
+            noMedicines.classList.add('hidden');
+            
+            medicines.forEach(med => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-opacity-10 transition-colors';
+                row.style.color = (window.elementSdk ? window.elementSdk.config.text_color : defaultConfig.text_color);
+                row.innerHTML = `
+                    <td class="px-4 py-3 font-medium">${med.medicine_name}</td>
+                    <td class="px-4 py-3">${med.city}</td>
+                    <td class="px-4 py-3">${med.expiry_date}</td>
+                    <td class="px-4 py-3">${med.quantity}</td>
+                    <td class="px-4 py-3">${med.contact}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Donor Functions
+        function openDonorRegistration() {
+            document.getElementById('donorModal').classList.remove('hidden');
+        }
+
+        function closeDonorModal() {
+            document.getElementById('donorModal').classList.add('hidden');
+            document.getElementById('donorForm').reset();
+        }
+
+        async function handleDonorRegistration(event) {
+            event.preventDefault();
+            
+            // Reset all error messages
+            document.querySelectorAll('.error-message').forEach(error => error.classList.add('hidden'));
+            
+            // Validate fields
+            let isValid = true;
+            const fields = [
+                { id: 'donorName', errorId: 'donorNameError' },
+                { id: 'donorBloodType', errorId: 'donorBloodTypeError' },
+                { id: 'donorAge', errorId: 'donorAgeError' },
+                { id: 'donorCity', errorId: 'donorCityError' },
+                { id: 'donorContact', errorId: 'donorContactError' }
+            ];
+            
+            fields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const error = document.getElementById(field.errorId);
+                
+                if (!input.value.trim()) {
+                    error.classList.remove('hidden');
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                return;
+            }
+            
+            const btn = document.getElementById('donorSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Registering...';
+            
+            const donorData = {
+                id: Date.now().toString(),
+                type: 'donor',
+                donor_name: document.getElementById('donorName').value,
+                blood_type: document.getElementById('donorBloodType').value,
+                age: parseInt(document.getElementById('donorAge').value),
+                city: document.getElementById('donorCity').value,
+                contact: document.getElementById('donorContact').value,
+                last_donation: document.getElementById('lastDonation').value || 'Never',
+                created_at: new Date().toISOString()
+            };
+
+            if (allData.length >= 999) {
+                showToast('Maximum limit of 999 records reached. Please delete some records first.');
+                btn.disabled = false;
+                btn.textContent = 'Register as Donor';
+                return;
+            }
+
+          // Data ko manually array mein save karne ke liye
+try {
+    // 1. Naya data main array mein push karein
+    allData.push({ ...donorData, type: 'donor' }); 
+
+    // 2. Success message dikhayein
+    showToast('Success! You are now registered locally.');
+    
+    // 3. Modal band karein aur cards refresh karein
+    closeDonorModal();
+    renderDonorCards(); 
+    
+    console.log("Record saved in allData array:", allData);
+} catch (error) {
+    showToast('Error saving record locally.');
+    console.error(error);
+}
+function renderMedicineTable(dataToRender = null) {
+    const tableBody = document.querySelector('.Available-Medicines-Table tbody') || document.querySelector('table tbody');
+    // Agar search se data aya hai toh wo dikhao, warna allData se medicines nikalo
+    const medicines = dataToRender || allData.filter(item => item.type === 'medicine');
+
+    if (!tableBody) return;
+    tableBody.innerHTML = ''; 
+
+    medicines.forEach(med => {
+        const row = document.createElement('tr');
+        row.className = "border-b hover:bg-gray-50 transition-colors";
+        row.innerHTML = `
+            <td class="p-3 text-sm font-medium text-gray-700">${med.medicine_name || 'N/A'}</td>
+            <td class="p-3 text-sm text-gray-600">${med.city || 'N/A'}</td>
+            <td class="p-3 text-sm text-gray-600">${med.expiry || 'N/A'}</td>
+            <td class="p-3 text-sm text-gray-600">${med.quantity || '0'}</td>
+            <td class="p-3 text-sm text-blue-600 font-semibold">${med.contact || 'N/A'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+            
+            btn.disabled = false;
+            btn.textContent = 'Register as Donor';
+        }
+
+       
+function filterDashboard() {
+    const searchTerm = document.getElementById('donorSearch').value.toLowerCase();
+
+    // 1. Donors Filter karein
+    const filteredDonors = allData.filter(item => 
+        item.type === 'donor' && 
+        (item.donor_name.toLowerCase().includes(searchTerm) || 
+         item.blood_type.toLowerCase().includes(searchTerm) || 
+         item.city.toLowerCase().includes(searchTerm))
+    );
+    
+    // Donor cards refresh karein (Custom data ke sath)
+    renderDonorCards(filteredDonors);
+
+    // 2. Medicines Filter karein
+    const filteredMedicines = allData.filter(item => 
+        item.type === 'medicine' && 
+        (item.medicine_name.toLowerCase().includes(searchTerm) || 
+         item.city.toLowerCase().includes(searchTerm))
+    );
+    
+    // Medicine table refresh karein (Custom data ke sath)
+    renderMedicineTable(filteredMedicines);
+}
+            
+ 
+
+        function filterDonors() {
+            const searchTerm = document.getElementById('donorSearch').value.toLowerCase();
+            const grid = document.getElementById('donorGrid');
+            const donors = allData.filter(item => item.type === 'donor');
+            const noDonors = document.getElementById('noDonors');
+            
+            if (!searchTerm) {
+                // If search is empty, show all donors
+                renderDonorCards();
+                return;
+            }
+            
+            // Filter donors based on search term
+            const filteredDonors = donors.filter(donor => {
+                return donor.donor_name.toLowerCase().includes(searchTerm) ||
+                       donor.blood_type.toLowerCase().includes(searchTerm) ||
+                       donor.city.toLowerCase().includes(searchTerm);
+            });
+            
+            // Re-render only filtered donors
+            grid.innerHTML = '';
+            
+            if (filteredDonors.length === 0) {
+                noDonors.classList.remove('hidden');
+                grid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-lg opacity-70">No donors found matching your search.</p></div>';
+                return;
+            }
+            
+            noDonors.classList.add('hidden');
+            
+            const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+            
+            filteredDonors.forEach(donor => {
+                const card = document.createElement('div');
+                card.className = 'donor-card p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all';
+                card.style.backgroundColor = config.surface_color;
+                card.style.color = config.text_color;
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="text-4xl">🩸</div>
+                        <div>
+                            <h3 class="text-xl font-bold">${donor.donor_name}</h3>
+                            <p class="text-lg font-semibold opacity-80">${donor.blood_type}</p>
+                        </div>
+                    </div>
+                    <p class="mb-2 opacity-70">📍 ${donor.city}</p>
+                    <p class="mb-2 opacity-70">👤 Age: ${donor.age}</p>
+                    <p class="mb-2 opacity-70">📞 ${donor.contact}</p>
+                    <p class="text-sm opacity-60">Last donation: ${donor.last_donation}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // AI Chat Functions
+        function sendChatMessage(event) {
+            event.preventDefault();
+            
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            setTimeout(() => {
+                const response = getAIResponse(message);
+                addChatMessage(response, 'bot');
+            }, 800);
+        }
+
+        function sendQuickMessage(message) {
+            addChatMessage(message, 'user');
+            
+            setTimeout(() => {
+                const response = getAIResponse(message);
+                addChatMessage(response, 'bot');
+            }, 800);
+        }
+
+        function addChatMessage(text, sender) {
+            const messagesArea = document.getElementById('chatMessages');
+            const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+            
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${sender === 'bot' ? 'bot-bubble' : 'user-bubble ml-auto'} p-4 rounded-2xl max-w-80`;
+            
+            if (sender === 'bot') {
+                bubble.style.backgroundColor = config.background_color;
+                bubble.style.color = config.text_color;
+            } else {
+                bubble.style.backgroundColor = config.primary_action_color;
+                bubble.style.color = config.surface_color;
+            }
+            
+            bubble.innerHTML = `<p class="message-text">${text}</p>`;
+            messagesArea.appendChild(bubble);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function getAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            for (let symptom in aiKnowledge) {
+                if (lowerMessage.includes(symptom)) {
+                    return aiKnowledge[symptom];
+                }
+            }
+            
+            return 'I recommend staying hydrated and getting plenty of rest. However, for accurate diagnosis and treatment, please consult with a healthcare professional. If symptoms are severe or emergency-related, please seek immediate medical attention.';
+        }
+
+        // Toast
+        function showToast(message) {
+            const toast = document.getElementById('successToast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', initialize);
+window.onload = () => {
+    if (typeof renderMedicineTable === 'function') renderMedicineTable();
+    if (typeof renderDonorCards === 'function') renderDonorCards();
+};
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b8c1afc66d090a4',t:'MTc2NzU0NDA4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
